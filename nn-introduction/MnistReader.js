@@ -76,10 +76,36 @@ function saveData(labels, inputs, path) {
   }
 }
 
-const testImages = readIdxFile("./datasets/mnist/t10k-images.idx3-ubyte");
+function saveTestingData() {
+  const testImages = readIdxFile("./datasets/mnist/t10k-images.idx3-ubyte");
 
-const testLabels = readIdxFile("./datasets/mnist/t10k-labels.idx1-ubyte");
+  const testLabels = readIdxFile("./datasets/mnist/t10k-labels.idx1-ubyte");
 
-saveData(testLabels.data, testImages.data, "./datasets/mnist/test-data");
-saveData(testLabels.data, testImages.data, "./frontend/public/mnist/test-data");
+  const binaryLabels = testLabels.data.map((label) => (label === 0 ? 1 : 0));
+  const flatImages = testImages.data.map((image) => image.flat());
+
+  saveData(binaryLabels, flatImages, "./datasets/mnist/test-data");
+  saveData(binaryLabels, testImages.data, "./frontend/public/mnist/test-data");
+}
+
+function saveTrainingData() {
+  const trainingImages = readIdxFile(
+    "./datasets/mnist/train-images.idx3-ubyte"
+  );
+
+  const trainingLabels = readIdxFile(
+    "./datasets/mnist/train-labels.idx1-ubyte"
+  );
+
+  const binaryLabels = trainingLabels.data.map((label) =>
+    label === 0 ? 1 : 0
+  );
+  const flatImages = trainingImages.data.map((image) => image.flat());
+
+  saveData(binaryLabels, flatImages, "./datasets/mnist/train-data");
+}
+
+saveTestingData();
+saveTrainingData();
+
 console.log("Parsing End!");
