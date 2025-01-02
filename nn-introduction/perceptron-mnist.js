@@ -53,6 +53,21 @@ class Perceptron {
     }
     return (correct / inputs.length) * 100;
   }
+  saveModel(path) {
+    console.log("Preparing export");
+    const exportData = {
+      weights: this.weights,
+      bias: this.bias,
+    };
+    const stringData = JSON.stringify(exportData, null, 2);
+
+    try {
+      fs.writeFileSync(path, stringData);
+      console.log("File saved to: " + path);
+    } catch (e) {
+      console.log("Save failed: ", e.message);
+    }
+  }
 }
 
 function shuffleArrays(array1, array2) {
@@ -79,7 +94,15 @@ function findMisclassified(inputs, labels, perceptron) {
   return misclassified;
 }
 
-const EPOCHS = 34;
+function displayMisclassified(misclassified) {
+  console.log(`Number of misclassifed data: ${misclassified.length}`);
+  for (const item of misclassified) {
+    console.log(
+      `Index: ${item.index}, label: ${item.label}, prediction: ${item.prediction}`
+    );
+  }
+}
+const EPOCHS = 89;
 const TRAIN_BATCHES = 10;
 const TEST_BATCHES = 2;
 const INPUT_SIZE = 28 * 28;
@@ -125,7 +148,10 @@ for (let epoch = 0; epoch < EPOCHS; epoch++) {
   );
 }
 
-findMisclassified(testInputs, testLabels, perceptron);
+const misclassified = findMisclassified(testInputs, testLabels, perceptron);
+displayMisclassified(misclassified);
+
+perceptron.saveModel("./frontend/public/mnist/binary-model.json");
 
 // console.log(perceptron.weights);
 // console.log(perceptron.bias);
