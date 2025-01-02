@@ -54,7 +54,32 @@ class Perceptron {
     return (correct / inputs.length) * 100;
   }
 }
-const EPOCHS = 200;
+
+function shuffleArrays(array1, array2) {
+  for (let i = array1.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array1[i], array1[j]] = [array1[j], array1[i]];
+    [array2[i], array2[j]] = [array2[j], array2[i]];
+  }
+}
+
+function findMisclassified(inputs, labels, perceptron) {
+  const misclassified = [];
+  for (let i = 0; i < inputs.length; i++) {
+    const prediction = perceptron.predict(inputs[i]);
+    if (prediction !== labels[i]) {
+      misclassified.push({
+        index: i,
+        image: inputs[i],
+        label: labels[i],
+        prediction,
+      });
+    }
+  }
+  return misclassified;
+}
+
+const EPOCHS = 34;
 const TRAIN_BATCHES = 10;
 const TEST_BATCHES = 2;
 const INPUT_SIZE = 28 * 28;
@@ -84,6 +109,7 @@ for (let i = 0; i < TEST_BATCHES; i++) {
 const perceptron = new Perceptron(INPUT_SIZE, 0.07);
 
 for (let epoch = 0; epoch < EPOCHS; epoch++) {
+  shuffleArrays(trainInputs, trainLabels);
   perceptron.train(trainInputs, trainLabels);
 
   const trainingAccuracy = perceptron.calculateAccuracy(
@@ -98,3 +124,8 @@ for (let epoch = 0; epoch < EPOCHS; epoch++) {
     `
   );
 }
+
+findMisclassified(testInputs, testLabels, perceptron);
+
+// console.log(perceptron.weights);
+// console.log(perceptron.bias);
