@@ -6,7 +6,9 @@ const SCALE = 10;
 
 function ImagePrediction() {
   const [binaryModel, setBinaryModel] = useState(null);
+  const [prediction, setPrediction] = useState(null);
   const canvasRef = useRef(null);
+  const isDrawingRef = useRef(false);
 
   useEffect(() => {
     fetch("/mnist/binary-model.json")
@@ -25,16 +27,31 @@ function ImagePrediction() {
     context.fillStyle = "black";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "white";
-    context.lineWidth = 2;
+    context.lineWidth = 1;
 
-    function startDrawing() {
-      console.log("startDrawing");
+    function startDrawing(event) {
+      const { offsetX, offsetY } = event;
+
+      const scaledX = offsetX / SCALE;
+      const scaledY = offsetY / SCALE;
+
+      context.beginPath();
+      context.moveTo(scaledX, scaledY);
+      isDrawingRef.current = true;
     }
-    function draw() {
-      console.log("draw");
+    function draw(event) {
+      if (!isDrawingRef.current) return;
+
+      const { offsetX, offsetY } = event;
+
+      const scaledX = offsetX / SCALE;
+      const scaledY = offsetY / SCALE;
+      context.lineTo(scaledX, scaledY);
+      context.stroke();
     }
     function stopDrawing() {
-      console.log("stopdrawing");
+      context.closePath();
+      isDrawingRef.current = false;
     }
 
     canvas.addEventListener("mousedown", startDrawing);
@@ -49,6 +66,36 @@ function ImagePrediction() {
       canvas.removeEventListener("mouseout", stopDrawing);
     };
   }, []);
+
+  function preprocessCanvas() {
+    const cavas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    const imageData = context.getImageData(0, 0, WIDTH, HEIGHT);
+    const grayScaleData = [];
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      grayScaleData.push(imageData.data[i]);
+    }
+    return grayScaleData;
+  }
+
+  function activationFunction() {
+    return sum >= 0 ? 1 : 0;
+  }
+
+  function predict() {
+    const inputs = preprocessCanvas();
+    let sum = binaryModel.bias;
+
+    binaryModel.weights.forEach((weight, i) => {
+      sum += weight * inputs[i];
+    });
+
+    const prediction = activationFunction(sum);
+    console.log(prediction);
+
+    setPrediction(prediction);
+  }
+
   return (
     <div>
       <h1>Image Prediction - Binary Perceptron</h1>
@@ -56,9 +103,9 @@ function ImagePrediction() {
         <canvas ref={canvasRef} style={{ border: "1px solid black" }} />
         <div>
           <button>Clear </button>
-          <button>Prediction</button>
+          <button onClick={predict}>Prediction</button>
         </div>
-        <p>Prediction: is Zero</p>
+        <p>Prediction: is {prediction}</p>
       </div>
     </div>
   );
