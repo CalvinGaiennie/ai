@@ -27,7 +27,7 @@ function ImagePrediction() {
     context.fillStyle = "black";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "white";
-    context.lineWidth = 1;
+    context.lineWidth = 1.5;
 
     function startDrawing(event) {
       const { offsetX, offsetY } = event;
@@ -68,7 +68,7 @@ function ImagePrediction() {
   }, []);
 
   function preprocessCanvas() {
-    const cavas = canvasRef.current;
+    const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, WIDTH, HEIGHT);
     const grayScaleData = [];
@@ -78,7 +78,7 @@ function ImagePrediction() {
     return grayScaleData;
   }
 
-  function activationFunction() {
+  function activationFunction(sum) {
     return sum >= 0 ? 1 : 0;
   }
 
@@ -96,16 +96,30 @@ function ImagePrediction() {
     setPrediction(prediction);
   }
 
+  function clearCanvas() {
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, WIDTH, HEIGHT);
+    context.fillStyle = "black";
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+    setPrediction(null);
+  }
+
   return (
     <div>
       <h1>Image Prediction - Binary Perceptron</h1>
       <div>
         <canvas ref={canvasRef} style={{ border: "1px solid black" }} />
         <div>
-          <button>Clear </button>
+          <button onClick={clearCanvas}>Clear </button>
           <button onClick={predict}>Prediction</button>
         </div>
-        <p>Prediction: is {prediction}</p>
+        {prediction != null && (
+          <p>
+            Prediction:{" "}
+            {prediction === 1 ? "Number is Zero" : "Number is 1 - 9."}
+          </p>
+        )}
       </div>
     </div>
   );
