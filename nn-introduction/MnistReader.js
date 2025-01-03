@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const BATCH_SIZE = 5000;
 const MAX_BATCHES = 10;
-const PIXEL_KEEP_THRESHOLD = 200;
+const PIXEL_KEEP_THRESHOLD = 30;
 function readIdxFile(filePath) {
   const data = fs.readFileSync(filePath);
 
@@ -81,13 +81,17 @@ function saveTestingData() {
 
   const testLabels = readIdxFile("./datasets/mnist/t10k-labels.idx1-ubyte");
 
-  const processedImages = testImages.data.map;
+  const processedImages = testImages.data.map((image) =>
+    image.map((row) =>
+      row.map((pixel) => (pixel > PIXEL_KEEP_THRESHOLD ? pixel : 0))
+    )
+  );
 
   const binaryLabels = testLabels.data.map((label) => (label === 0 ? 1 : 0));
-  const flatImages = testImages.data.map((image) => image.flat());
+  const flatImages = processedImages.map((image) => image.flat());
 
   saveData(binaryLabels, flatImages, "./datasets/mnist/test-data");
-  saveData(binaryLabels, testImages.data, "./frontend/public/mnist/test-data");
+  saveData(binaryLabels, processedImages, "./frontend/public/mnist/test-data");
 }
 
 function saveTrainingData() {
