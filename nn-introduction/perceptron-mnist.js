@@ -106,6 +106,7 @@ function displayMisclassified(misclassified) {
 function normalizeData(data) {
   return data.map((input) => input.map((pixel) => pixel / 255));
 }
+
 const EPOCHS = 88;
 const TRAIN_BATCHES = 10;
 const TEST_BATCHES = 2;
