@@ -67,11 +67,16 @@ function ImagePrediction() {
     };
   }, []);
 
+  function normalizeData(pixel) {
+    const pix = pixel / 255;
+    return pix;
+  }
   function preprocessCanvas() {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, WIDTH, HEIGHT);
     const grayScaleData = [];
+
     for (let i = 0; i < imageData.data.length; i += 4) {
       grayScaleData.push(imageData.data[i]);
     }
@@ -83,7 +88,8 @@ function ImagePrediction() {
   }
 
   function predict() {
-    const inputs = preprocessCanvas();
+    const inputs = preprocessCanvas().map((pixel) => normalizeData(pixel));
+    console.log(inputs);
     let sum = binaryModel.bias;
 
     binaryModel.weights.forEach((weight, i) => {
@@ -105,6 +111,23 @@ function ImagePrediction() {
     setPrediction(null);
   }
 
+  function saveToTrainingSet(label) {
+    const input = preprocessCanvas();
+    const misclassifiedData = { input, label };
+
+    fetch("http://localhost:3001/save-misclassified", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(misclassifiedData),
+    })
+      .then((data) => {
+        console.log(`data has been saved! data: ${data}`);
+        clearCanvas();
+      })
+      .catch((error) => console.log("error saving data" + error));
+  }
   return (
     <div>
       <h1>Image Prediction - Binary Perceptron</h1>
@@ -120,6 +143,10 @@ function ImagePrediction() {
             {prediction === 1 ? "Number is Zero" : "Number is 1 - 9."}
           </p>
         )}
+        <div>
+          <button onClick={() => saveToTrainingSet(0)}>Save: Label 0</button>
+          <button onClick={() => saveToTrainingSet(1)}>Save: Label 1</button>
+        </div>
       </div>
     </div>
   );

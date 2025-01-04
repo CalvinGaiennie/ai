@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const BATCH_SIZE = 5000;
 const MAX_BATCHES = 10;
-const PIXEL_KEEP_THRESHOLD = 30;
+const PIXEL_KEEP_THRESHOLD = 20;
 function readIdxFile(filePath) {
   const data = fs.readFileSync(filePath);
 
