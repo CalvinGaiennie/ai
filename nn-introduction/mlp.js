@@ -1,18 +1,46 @@
 class MLP {
-    constructor() {
-        this.weightsInputsHidden = {
-            [.5,.5,.5,.5], //Weights for hidden neuron 1
-            [-.5,-.5,-.5,-.5], //Weights for hidden neuron 2
-        },
-        this.biasesHidden = [.1, -.1],
+  constructor() {
+    (this.weightsInputsHidden = [
+      [0.5, 0.5, 0.5, 0.5],
+      //Weights for hidden neuron 1
+      [-0.5, -0.5, -0.5, -0.5],
+      //Weights for hidden neuron 2
+    ]),
+      (this.biasesHidden = [0.1, -0.1]),
+      (this.weightsHiddenOutput = [
+        [1, -1], //weights for output neuron 1
+        [-1, 1], //weights for output neuron 2
+      ]);
+    this.biasesOutput = [0.1, 0.1];
+  }
 
-        this.weightsHiddenOutput = [
-            [1,-1], //weights for output neuron 1
-            [-1,1] //weights for output neuron 2
-        ]
-        this. biasesOutput = [.1,.1]
-    }
+  reluActivation(weightedSum) {
+    return Math.max(0, weightedSum);
+  }
+  forward(inputs) {
+    const hiddenSums = this.weightsInputsHidden.map((weights, i) => {
+      return weights.reduce(
+        (sum, weight, j) => sum + weight * inputs[j],
+        this.biasesHidden[i]
+      );
+    });
+
+    const hiddenActivations = hiddenSums.map((weightedSum) =>
+      this.reluActivation(weightedSum)
+    );
+
+    const outputSums = this.weightsHiddenOutput.map((weights, i) => {
+      return weights.reduce(
+        (sum, weight, j) => sum + weight * hiddenActivations[j],
+        this.biasesOutput[i]
+      );
+    });
+
+    console.log(outputSums);
+  }
 }
 
-const mlp = new MLP()
-const input = [ .1,.2,.3,.4]
+const mlp = new MLP();
+const image = [0.1, 0.2, 0.3, 0.4];
+
+mlp.forward(image);
