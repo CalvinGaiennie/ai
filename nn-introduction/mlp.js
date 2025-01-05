@@ -17,6 +17,10 @@ class MLP {
   reluActivation(weightedSum) {
     return Math.max(0, weightedSum);
   }
+
+  softmax(outputs) {
+    return outputs.map((output, index) => {});
+  }
   forward(inputs) {
     const hiddenSums = this.weightsInputsHidden.map((weights, i) => {
       return weights.reduce(
@@ -43,4 +47,6 @@ class MLP {
 const mlp = new MLP();
 const image = [0.1, 0.2, 0.3, 0.4];
 
-mlp.forward(image);
+const outputProbabilities = mlp.forward(image);
+
+console.log(outputProbabilities);
