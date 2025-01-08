@@ -18,9 +18,21 @@ class MLP {
     return Math.max(0, weightedSum);
   }
 
+  // softmax(outputs) {
+  //   return outputs.map((output, index) => {
+  //     const nominator = Math.exp(output);
+  //     const denominator = outputs.reduce((sum, val) => sum + Math.exp(val), 0);
+  //     return nominator / denominator;
+  //   });
+  // }
+
   softmax(outputs) {
-    return outputs.map((output, index) => {});
+    const maxOutput = Math.max(...outputs);
+    const expValues = outputs.map((output) => Math.exp(output - maxOutput));
+    const sumExpValues = expValues.reduce((sum, val) => sum + val, 0);
+    return expValues.map((val) => val / sumExpValues);
   }
+
   forward(inputs) {
     const hiddenSums = this.weightsInputsHidden.map((weights, i) => {
       return weights.reduce(
