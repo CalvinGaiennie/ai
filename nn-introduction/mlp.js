@@ -12,19 +12,14 @@ class MLP {
         [-1, 1], //weights for output neuron 2
       ]);
     this.biasesOutput = [0.1, 0.1];
+
+    this.outputSum = [];
+    this.outputProbabilities = [];
   }
 
   reluActivation(weightedSum) {
     return Math.max(0, weightedSum);
   }
-
-  // softmax(outputs) {
-  //   return outputs.map((output, index) => {
-  //     const nominator = Math.exp(output);
-  //     const denominator = outputs.reduce((sum, val) => sum + Math.exp(val), 0);
-  //     return nominator / denominator;
-  //   });
-  // }
 
   softmax(outputs) {
     const maxOutput = Math.max(...outputs);
@@ -40,25 +35,38 @@ class MLP {
         this.biasesHidden[i]
       );
     });
+    console.log("hidden sums" + hiddenSums);
 
     const hiddenActivations = hiddenSums.map((weightedSum) =>
       this.reluActivation(weightedSum)
     );
 
-    const outputSums = this.weightsHiddenOutput.map((weights, i) => {
+    this.outputSums = this.weightsHiddenOutput.map((weights, i) => {
       return weights.reduce(
         (sum, weight, j) => sum + weight * hiddenActivations[j],
         this.biasesOutput[i]
       );
     });
 
-    console.log(outputSums);
+    this.outputProbabilities = this.softmax(this.outputSums);
+  }
+
+  backward(targets) {
+    const outputDeltas = this.outputProbabilities.map(
+      (probability, i) => probability - targets[i]
+    );
+    console.log("output deltas", outputDeltas);
+  }
+
+  train(inputs, targets) {
+    this.forward(inputs);
+    this.backward(targets);
   }
 }
 
 const mlp = new MLP();
 const image = [0.1, 0.2, 0.3, 0.4];
+const targets = [1, 0];
 
-const outputProbabilities = mlp.forward(image);
-
-console.log(outputProbabilities);
+mlp.train(image, targets);
+console.log(mlp.outputSums, mlp.outputProbabilities);
