@@ -1,7 +1,7 @@
 class MLP {
   constructor() {
     this.learningRate = 0.01;
-    (this.weightsInputsHidden = [
+    (this.weightsInputHidden = [
       [0.5, 0.5, 0.5, 0.5],
       //Weights for hidden neuron 1
       [-0.5, -0.5, -0.5, -0.5],
@@ -36,14 +36,12 @@ class MLP {
   }
 
   forward(inputs) {
-    this.hiddenSums = this.weightsInputsHidden.map((weights, i) => {
+    this.hiddenSums = this.weightsInputHidden.map((weights, i) => {
       return weights.reduce(
         (sum, weight, j) => sum + weight * inputs[j],
         this.biasesHidden[i]
       );
     });
-    console.log("hidden sums" + this.hiddenSums);
-
     this.hiddenActivations = this.hiddenSums.map((weightedSum) =>
       this.reluActivation(weightedSum)
     );
@@ -56,20 +54,12 @@ class MLP {
     });
 
     this.outputProbabilities = this.softmax(this.outputSums);
-
-    console.log(
-      "outputsums,",
-      this.outputSums,
-      "outputprobabilities",
-      this.outputProbabilities
-    );
   }
 
-  backward(targets) {
+  backward(inputs, targets) {
     const outputDeltas = this.outputProbabilities.map(
       (probability, i) => probability - targets[i]
     );
-    console.log("output deltas", outputDeltas);
 
     const hiddenDeltas = this.hiddenSums.map((z, i) => {
       const error = outputDeltas.reduce(
@@ -79,8 +69,6 @@ class MLP {
       return error * this.reluDerivate(z);
     });
 
-    console.log("hidden deltas ", hiddenDeltas);
-
     this.weightsHiddenOutput = this.weightsHiddenOutput.map((weights, i) => {
       return weights.map(
         (weight, j) =>
@@ -88,17 +76,24 @@ class MLP {
           this.learningRate * outputDeltas[i] * this.hiddenActivations[j]
       );
     });
-
-    console.log("Weight h->o :", this.weightsHiddenOutput);
     this.biasesOutput = this.biasesOutput.map((bias, i) => {
       return bias - this.learningRate * outputDeltas[i];
     });
-    console.log("Biases Output:", this.biasesOutput);
+
+    this.weightsInputHidden = this.weightsInputHidden.map((weights, i) => {
+      return weights.map(
+        (weight, j) => weight - this.learningRate * hiddenDeltas[i] * inputs[j]
+      );
+    });
+
+    this.biasesHidden = this.biasesHidden.map((bias, i) => {
+      return bias - this.learningRate * hiddenDeltas[i];
+    });
   }
 
   train(inputs, targets) {
     this.forward(inputs);
-    this.backward(targets);
+    this.backward(inputs, targets);
   }
 }
 
