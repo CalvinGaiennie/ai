@@ -7,15 +7,16 @@ function randomize() {
   return Math.random() * 0.3 - 0.1;
 }
 
+function mseLoss(outputs, targets) {
+  return (
+    0.5 *
+    outputs.reduce((sum, output, i) => sum + (output - targets[i]) ** 2, 0)
+  );
+}
+
 class MLP {
   constructor(inputSize, hiddenSize, outputSize) {
     this.learningRate = 0.01;
-    // (this.weightsInputHidden = [
-    //   [0.5, 0.5, 0.5, 0.5],
-    //   //Weights for hidden neuron 1
-    //   [-0.5, -0.5, -0.5, -0.5],
-    //   //Weights for hidden neuron 2...
-    // ]),
 
     this.weightsInputHidden = Array.from({ length: hiddenSize }, () =>
       Array.from({ length: inputSize }, randomize)
@@ -69,6 +70,7 @@ class MLP {
     });
 
     this.outputProbabilities = this.softmax(this.outputSums);
+    return this.outputProbabilities;
   }
 
   backward(inputs, targets) {
@@ -118,8 +120,6 @@ const outputSize = 2;
 
 const mlp = new MLP(inputSize, hiddenSize, outputSize);
 
-console.log("before Training", mlp);
-
 const trainingData = [
   { inputs: [0.1, 0.2, 0.3, 0.4], targets: [1, 0] },
   { inputs: [0.5, 0.6, 0.7, 0.8], targets: [0, 1] },
@@ -130,9 +130,14 @@ const trainingData = [
 const EPOCHS = 100;
 
 for (let epoch = 0; epoch < EPOCHS; epoch++) {
+  let totalLoss = 0;
   for (let i = 0; i < trainingData.length; i++) {
-    mlp.train(trainingData[i].inputs, trainingData[i].targets);
+    const outputsProbabilities = mlp.train(
+      trainingData[i].inputs,
+      trainingData[i].targets
+    );
+    totalLoss += mseLoss(mlp.outputProbabilities, trainingData[i].targets);
   }
-}
 
-console.log("After Training", mlp);
+  console.log(`Epoch ${epoch}, Loss: ${totalLoss / trainingData.length}`);
+}
