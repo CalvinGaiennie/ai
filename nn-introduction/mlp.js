@@ -124,7 +124,7 @@ class MLP {
 }
 
 //Model Training
-const EPOCHS = 100;
+const EPOCHS = 1;
 const TRAIN_BATCHES = 2;
 const TEST_BATCHES = 2;
 
@@ -159,34 +159,31 @@ const outputSize = 10;
 
 const mlp = new MLP(inputSize, hiddenSize, outputSize);
 
-// for (let epoch = 0; epoch < EPOCHS; epoch++) {
-//   let totalLoss = 0;
-//   for (let i = 0; i < trainingData.length; i++) {
-//     const outputsProbabilities = mlp.train(
-//       trainingData[i].inputs,
-//       trainingData[i].targets
-//     );
-//     totalLoss += mseLoss(mlp.outputProbabilities, trainingData[i].targets);
-//   }
+for (let epoch = 0; epoch < EPOCHS; epoch++) {
+  let totalLoss = 0;
+  for (let i = 0; i < trainInputs.length; i++) {
+    mlp.train(trainInputs[i], trainLabelsEncoded[i]);
+    totalLoss += mseLoss(mlp.outputProbabilities, trainLabelsEncoded[i]);
+  }
 
-//   console.log(`Epoch ${epoch}, Loss: ${totalLoss / trainingData.length}`);
-// }
+  console.log(`Epoch ${epoch}, Loss: ${totalLoss / trainInputs.length}`);
+}
 
-// let correctPredictions = 0;
+let correctPredictions = 0;
 
-// for (let i = 0; i < testingData.length; i++) {
-//   const targets = testingData[i].targets;
-//   const outputProbabilites = mlp.forward(testingData[i].inputs);
+for (let i = 0; i < testInputs.length; i++) {
+  const targets = testLabelsEncoded[i];
+  const outputProbabilites = mlp.forward(testInputs[i]);
 
-//   const predicted = outputProbabilites.indexOf(Math.max(...outputProbabilites));
+  const predicted = outputProbabilites.indexOf(Math.max(...outputProbabilites));
 
-//   const target = targets.indexOf(Math.max(...targets));
+  const target = targets.indexOf(Math.max(...targets));
 
-//   if (predicted === target) {
-//     correctPredictions++;
-//   }
-// }
+  if (predicted === target) {
+    correctPredictions++;
+  }
+}
 
-// const accuracy = (correctPredictions / testingData.length) * 100;
+const accuracy = (correctPredictions / testInputs.length) * 100;
 
-// console.log(`Accuracy: ${accuracy}%`);
+console.log(`Accuracy: ${accuracy}%`);
