@@ -37,7 +37,7 @@ class MLP {
       Array.from({ length: hiddenSize }, randomize)
     );
 
-    this.biasesOutput = [0.1, 0.1];
+    this.biasesOutput = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1];
 
     this.outputSum = [];
     this.outputProbabilities = [];
@@ -55,8 +55,13 @@ class MLP {
 
   softmax(outputs) {
     const maxOutput = Math.max(...outputs);
-    const expValues = outputs.map((output) => Math.exp(output - maxOutput));
+    const expValues = outputs.map((output) => {
+      const expVal = Math.exp(output - maxOutput);
+      return expVal;
+    });
+
     const sumExpValues = expValues.reduce((sum, val) => sum + val, 0);
+
     return expValues.map((val) => val / sumExpValues);
   }
 
@@ -79,6 +84,7 @@ class MLP {
     });
 
     this.outputProbabilities = this.softmax(this.outputSums);
+
     return this.outputProbabilities;
   }
 
@@ -121,10 +127,28 @@ class MLP {
     this.forward(inputs);
     this.backward(inputs, targets);
   }
+
+  saveModel(path) {
+    console.log("Preparing export");
+    const exportData = {
+      weightsInputHidden: this.weightsInputHidden,
+      biasesHidden: this.biasesHidden,
+      weightsHiddenOutput: this.weightsHiddenOutput,
+      biasesOutput: this.biasesOutput,
+    };
+    const stringData = JSON.stringify(exportData, null, 2);
+
+    try {
+      fs.writeFileSync(path, stringData);
+      console.log("File saved to: " + path);
+    } catch (e) {
+      console.log("Save failed: ", e.message);
+    }
+  }
 }
 
 //Model Training
-const EPOCHS = 1;
+const EPOCHS = 50;
 const TRAIN_BATCHES = 2;
 const TEST_BATCHES = 2;
 
@@ -159,31 +183,40 @@ const outputSize = 10;
 
 const mlp = new MLP(inputSize, hiddenSize, outputSize);
 
-for (let epoch = 0; epoch < EPOCHS; epoch++) {
+for (let epoch = 0; epoch <= EPOCHS; epoch++) {
   let totalLoss = 0;
   for (let i = 0; i < trainInputs.length; i++) {
     mlp.train(trainInputs[i], trainLabelsEncoded[i]);
+
     totalLoss += mseLoss(mlp.outputProbabilities, trainLabelsEncoded[i]);
   }
 
-  console.log(`Epoch ${epoch}, Loss: ${totalLoss / trainInputs.length}`);
-}
+  if (epoch % 2 == 0) {
+    let correctPredictions = 0;
 
-let correctPredictions = 0;
+    for (let j = 0; j < testInputs.length; j++) {
+      const targets = testLabelsEncoded[j];
+      const outputProbabilites = mlp.forward(testInputs[j]);
 
-for (let i = 0; i < testInputs.length; i++) {
-  const targets = testLabelsEncoded[i];
-  const outputProbabilites = mlp.forward(testInputs[i]);
+      const predicted = outputProbabilites.indexOf(
+        Math.max(...outputProbabilites)
+      );
 
-  const predicted = outputProbabilites.indexOf(Math.max(...outputProbabilites));
+      const target = targets.indexOf(Math.max(...targets));
 
-  const target = targets.indexOf(Math.max(...targets));
+      if (predicted === target) {
+        correctPredictions++;
+      }
+    }
 
-  if (predicted === target) {
-    correctPredictions++;
+    const accuracy = (correctPredictions / testInputs.length) * 100;
+
+    console.log(
+      `Epoch ${epoch}, Accuracy: ${accuracy}%, Loss: ${
+        totalLoss / trainInputs.length
+      }, Correct Predictions: ${correctPredictions}/${testInputs.length}`
+    );
   }
 }
 
-const accuracy = (correctPredictions / testInputs.length) * 100;
-
-console.log(`Accuracy: ${accuracy}%`);
+mlp.saveModel("./frontend/public/mnist/mlp-mnist-model.json");
