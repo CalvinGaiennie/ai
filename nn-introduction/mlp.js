@@ -24,8 +24,8 @@ function oneHotEncode(label) {
 }
 
 class MLP {
-  constructor(inputSize, hiddenSize, outputSize) {
-    this.learningRate = 0.01;
+  constructor(inputSize, hiddenSize, outputSize, learningRate = 0.01) {
+    this.learningRate = learningRate;
 
     this.weightsInputHidden = Array.from({ length: hiddenSize }, () =>
       Array.from({ length: inputSize }, randomize)
@@ -148,8 +148,9 @@ class MLP {
 }
 
 //Model Training
-const EPOCHS = 50;
-const TRAIN_BATCHES = 2;
+const EPOCHS = 60;
+const LEARNING_RATE = 0.008;
+const TRAIN_BATCHES = 8;
 const TEST_BATCHES = 2;
 
 const trainInputs = [];
@@ -178,10 +179,10 @@ const trainLabelsEncoded = trainLabels.map((label) => oneHotEncode(label));
 const testLabelsEncoded = testLabels.map((label) => oneHotEncode(label));
 
 const inputSize = trainInputs[0].length;
-const hiddenSize = 32;
+const hiddenSize = 64;
 const outputSize = 10;
 
-const mlp = new MLP(inputSize, hiddenSize, outputSize);
+const mlp = new MLP(inputSize, hiddenSize, outputSize, LEARNING_RATE);
 
 for (let epoch = 0; epoch <= EPOCHS; epoch++) {
   let totalLoss = 0;

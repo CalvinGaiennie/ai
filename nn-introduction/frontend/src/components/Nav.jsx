@@ -14,6 +14,9 @@ function Nav() {
           <NavLink to="/ImagePrediction">Image Prediction</NavLink>
         </li>
         <li>
+          <NavLink to="/ImagePredictionMlp">Image Prediction Mlp</NavLink>
+        </li>
+        <li>
           <NavLink to="/TestPerceptron">Test Perceptron</NavLink>
         </li>
       </ul>
