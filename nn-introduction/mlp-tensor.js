@@ -66,10 +66,28 @@ function loadData(trainBatches, testBatches) {
 }
 
 function createModel(inputSize, hiddenSize, outputSize, learningRate) {
-  console.log(inputSize);
-  console.log(hiddenSize);
-  console.log(outputSize);
-  console.log(learningRate);
+  const model = tf.sequential();
+
+  model.add(
+    tf.layers.dense({
+      inputShape: [inputSize],
+      units: hiddenSize,
+      activation: "relu",
+    })
+  );
+  model.add(
+    tf.layers.dense({
+      units: outputSize,
+      activation: "softmax",
+    })
+  );
+  model.compile({
+    optimizer: tf.train.adam(learningRate),
+    loss: "categoricalCrossentropy",
+    metrics: ["accuracy"],
+  });
+
+  return model;
 }
 
 const { trainInputs, trainLabels, testInputs, testLabels } = loadData(8, 2);
@@ -85,3 +103,6 @@ const outputSize = 10;
 const learningRate = 0.008;
 
 createModel(inputSize, hiddenSize, outputSize, learningRate);
+
+const model = createModel(inputSize, hiddenSize, outputSize, learningRate);
+console.log(model);
