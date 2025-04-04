@@ -97,6 +97,7 @@ const trainLabelsTensor = tf.tensor2d(trainLabels);
 const testInputsTensor = tf.tensor2d(testInputs);
 const testLabelsTensor = tf.tensor2d(testLabels);
 
+const EPOCHS = 15;
 const inputSize = trainInputs[0].length;
 const hiddenSize = 64;
 const outputSize = 10;
@@ -105,4 +106,21 @@ const learningRate = 0.008;
 createModel(inputSize, hiddenSize, outputSize, learningRate);
 
 const model = createModel(inputSize, hiddenSize, outputSize, learningRate);
-console.log(model);
+
+async function trainModel() {
+  await model.fit(trainInputsTensor, trainLabelsTensor, {
+    epochs: EPOCHS,
+    validatonData: [testInputsTensor, testLabelsTensor],
+  });
+
+  const results = model.evaluate(testInputsTensor, testLabelsTensor);
+
+  const testAccuracy = results[1].dataSync()[0] * 100;
+  console.log(`test accuracy: ${testAccuracy.toFixed(2)}%`);
+
+  const savePath = "file://./frontend/public/mnist/mlp-model-tf";
+  await model.save(savePath);
+  console.log(`Model saved to: ${savePath}`);
+}
+
+trainModel();
